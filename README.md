@@ -1,5 +1,66 @@
-SPEC
+REQUIREMENTS
+============
+
+A Docker daemon is required to run this, and network access to DockerHub.
+
+RUNNING
+=======
+
+For example, given a file called `input` with the data to be parsed according to the below `SPECIFICATION`:
+
+`cat input | docker run -i imiell/cron_reader 16:10`
+
+Will output the next run for each command specification.
+
+BUILDING
+========
+
+If you want to build the Docker image yourself:
+
+`docker build -t [IMAGE_NAME] .`
+
+and run with:
+
+`cat input | docker run -i [IMAGE_NAME] [HH:MM]`
+
+TEST
 ====
+
+To run, replace the image name references in `build.sh` with your preferred image reference, and run:
+
+```
+./build.sh
+```
+
+Then run:
+
+```
+cat test | docker run -i [IMAGE_NAME] 16:10
+```
+
+expected output:
+
+```
+1:30 tomorrow - /bin/run_me_daily
+16:45 today - /bin/run_me_hourly
+16:10 today - /bin/run_me_every_minute
+19:00 today - /bin/run_me_sixty_times
+0:00 tomorrow - /bin/run_me_at_midnight
+23:59 today - /bin/run_me_just_before_midnight
+1:01 tomorrow - /bin/run_me_at_one_past_one
+```
+
+The following commands should fail:
+
+```
+cat test | docker run -i [IMAGE_NAME] 0:0
+cat test | docker run -i [IMAGE_NAME] :
+cat test | docker run -i [IMAGE_NAME] 0:00
+cat test | docker run -i [IMAGE_NAME] 24:00
+```
+
+SPECIFICATION
+=============
 
 We have a set of tasks, each running at least daily, which are scheduled
 with a simplified cron. We want to find when each of them will next run.
@@ -9,7 +70,6 @@ The scheduler configuration looks like this:
 ```
 30 1 /bin/run_me_daily
 45 * /bin/run_me_hourly
-
 * * /bin/run_me_every_minute
 * 19 /bin/run_me_sixty_times
 ```

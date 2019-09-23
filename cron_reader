@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+import sys
+import time
+import datetime
+
+def usage():
+	print('An argument of the form HH:MM must be supplied within appropriate bounds (ie 00:00 - 23:59).')
+	sys.exit(1)
+
+def main():
+
+	# Pick up argument 1 and split into HH and MM.
+	try:
+		arg = sys.argv[1].split(':')
+		if len(arg[0]) != 2 or len(arg[1]) != 2:
+			raise ValueError('')
+		current_hour   = int(arg[0].lstrip('0').zfill(1))
+		current_minute = int(arg[1].lstrip('0').zfill(1))
+	except:
+		usage()
+	arg = None
+
+	# Check that the hours and minutes are within the appropriate values.
+	if current_hour > 23 or current_hour < 0 or current_minute > 59 or current_minute < 0:
+		usage()
+
+	# Get current time (clock seconds)
+	current = time.localtime()
+	# Get the 'current time' with the passed-in time.
+	current_tm = time.struct_time((current.tm_year, current.tm_mon, current.tm_mday, current_hour, current_minute, 0, current.tm_wday, current.tm_yday, current.tm_isdst))
+	tomorrow = datetime.date.today() + datetime.timedelta(days = 1)
+	tomorrow_tm = tomorrow.timetuple()
+	# For each line in stdin...
+	for line in sys.stdin:
+		line_elements = line.split(' ')
+		if len(line_elements) < 3:
+			continue
+		# Extract the times
+		minute  = line_elements[0]
+		hour    = line_elements[1]
+		command = ' '.join(line_elements[2:]).strip()
+		if minute == '*':
+			minute = list(range(0,60))
+		else:
+			minute = [int(minute),]
+		if hour == '*':
+			hour = list(range(0,24))
+		else:
+			hour = [int(hour),]
+		get_next_run(minute, hour, command, current_tm, tomorrow_tm)
+
+def get_next_run(minute, hour, command, tm, tomorrow_tm):
+	for d in ('today', 'tomorrow'):
+		if d == 'today':
+			year = tm.tm_year
+			mon  = tm.tm_mon
+			mday = tm.tm_mday
+			wday = tm.tm_wday
+			yday = tm.tm_yday
+		else:
+			year = tomorrow_tm.tm_year
+			mon  = tomorrow_tm.tm_mon
+			mday = tomorrow_tm.tm_mday
+			wday = tomorrow_tm.tm_wday
+			yday = tomorrow_tm.tm_yday
+		for h in hour:
+			for m in minute:
+				# Calculate time
+				runtime = time.struct_time((year, mon, mday, h, m, 0, wday, yday, tm.tm_isdst))
+				# Is this in the future?
+				if runtime >= tm:
+					print(str(runtime.tm_hour) + ':' + str(runtime.tm_min).zfill(2) + ' ' + d + ' - ' + command)
+					# No need to continue - return.
+					return
+
+main()
