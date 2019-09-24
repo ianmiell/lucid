@@ -58,6 +58,9 @@ cat test | docker run -i [IMAGE_NAME] 0:0
 cat test | docker run -i [IMAGE_NAME] :
 cat test | docker run -i [IMAGE_NAME] 0:00
 cat test | docker run -i [IMAGE_NAME] 24:00
+cat test | docker run -i [IMAGE_NAME] 00:60
+cat test | docker run -i [IMAGE_NAME] 00:-1
+cat test | docker run -i [IMAGE_NAME] -1:00
 ```
 
 SPECIFICATION
