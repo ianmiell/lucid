@@ -1,7 +1,8 @@
 REQUIREMENTS
 ============
 
-A Docker daemon is required to run this, and network access to DockerHub.
+- Docker 
+- Network access to DockerHub
 
 RUNNING
 =======
